@@ -22,6 +22,7 @@ public class ConsulConfigurationSourceBuilder {
 
   private String host;
   private int port;
+  private String token;
 
   /**
    * Construct {@link ConsulConfigurationSource}s builder
@@ -35,6 +36,7 @@ public class ConsulConfigurationSourceBuilder {
   public ConsulConfigurationSourceBuilder() {
     host = "localhost";
     port = 8500;
+    token = null;
   }
 
   /**
@@ -59,13 +61,24 @@ public class ConsulConfigurationSourceBuilder {
     return this;
   }
 
+    /**
+   * Set Consul host for {@link ConsulConfigurationSource}s built by this builder.
+   *
+   * @param token token to use
+   * @return this builder with Consul host set to provided parameter
+   */
+  public ConsulConfigurationSourceBuilder withToken(String token) {
+    this.token = token;
+    return this;
+  }
+
   /**
    * Build a {@link ConsulConfigurationSource} using this builder's configuration
    *
    * @return new {@link ConsulConfigurationSource}
    */
   public ConsulConfigurationSource build() {
-    return new ConsulConfigurationSource(host, port);
+    return new ConsulConfigurationSource(host, port, token);
   }
 
   @Override
@@ -73,6 +86,6 @@ public class ConsulConfigurationSourceBuilder {
     return "ConsulConfigurationSource{" +
         "host=" + host +
         ", port=" + port +
-        '}';
+        ", token=****}";
   }
 }

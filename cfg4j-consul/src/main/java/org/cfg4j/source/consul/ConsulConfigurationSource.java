@@ -33,7 +33,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Note: use {@link ConsulConfigurationSourceBuilder} for building instances of this class.
+ * Note: use {@link ConsulConfigurationSourceBuilder} for building instances of
+ * this class.
  * <p>
  * Read configuration from the Consul K-V store.
  */
@@ -45,19 +46,23 @@ public class ConsulConfigurationSource implements ConfigurationSource {
   private Map<String, String> consulValues;
   private final String host;
   private final int port;
+  private final String token;
   private boolean initialized;
 
   /**
-   * Note: use {@link ConsulConfigurationSourceBuilder} for building instances of this class.
+   * Note: use {@link ConsulConfigurationSourceBuilder} for building instances of
+   * this class.
    * <p>
-   * Read configuration from the Consul K-V store located at {@code host}:{@code port}.
+   * Read configuration from the Consul K-V store located at
+   * {@code host}:{@code port}.
    *
    * @param host Consul host to connect to
    * @param port Consul port to connect to
    */
-  ConsulConfigurationSource(String host, int port) {
+  ConsulConfigurationSource(String host, int port, String token) {
     this.host = requireNonNull(host);
     this.port = port;
+    this.token = token;
 
     initialized = false;
   }
@@ -67,7 +72,8 @@ public class ConsulConfigurationSource implements ConfigurationSource {
     LOG.trace("Requesting configuration for environment: " + environment.getName());
 
     if (!initialized) {
-      throw new IllegalStateException("Configuration source has to be successfully initialized before you request configuration.");
+      throw new IllegalStateException(
+          "Configuration source has to be successfully initialized before you request configuration.");
     }
 
     reload();
@@ -99,8 +105,12 @@ public class ConsulConfigurationSource implements ConfigurationSource {
   public void init() {
     try {
       LOG.info("Connecting to Consul client at " + host + ":" + port);
-
-      Consul consul = Consul.builder().withHostAndPort(HostAndPort.fromParts(host, port)).build();
+      Consul consul = null;
+      if (this.token == null) {
+         consul = Consul.builder().withHostAndPort(HostAndPort.fromParts(host, port)).build();
+      } else {
+         consul = Consul.builder().withHostAndPort(HostAndPort.fromParts(host, port)).withTokenAuth(this.token).build();
+      }
 
       kvClient = consul.keyValueClient();
     } catch (Exception e) {
